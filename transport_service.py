@@ -37,21 +37,35 @@ class UnifiedTransportService:
         self.repo = StopsRepository()
 
     def get_stop_from_repo(
-            self,
-            stop_id: Optional[str] = None,
-            stop_name: Optional[str] = None,
-            route_number: Optional[str] = None,
-        ) -> Optional[Dict[str, Any]]:
-            if stop_id:
-                found = self.repo.find_stop(stop_id, route_number=route_number)
-                if found:
-                    return found
-            if stop_name:
-                found = self.repo.find_stop(stop_name, route_number=route_number)
-                if found:
-                    return found
-            return None
+        self,
+        stop_id: Optional[str] = None,
+        stop_name: Optional[str] = None,
+        route_number: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        if stop_id:
+            if route_number:
+                try:
+                    found = self.repo.find_stop(stop_id, route_number=route_number)
+                except TypeError:
+                    found = self.repo.find_stop(stop_id)
+            else:
+                found = self.repo.find_stop(stop_id)
+            if found:
+                return found
 
+        if stop_name:
+            if route_number:
+                try:
+                    found = self.repo.find_stop(stop_name, route_number=route_number)
+                except TypeError:
+                    found = self.repo.find_stop(stop_name)
+            else:
+                found = self.repo.find_stop(stop_name)
+            if found:
+                return found
+
+        return None
+    
     async def resolve_stop(
         self,
         stop_id: Optional[str] = None,
